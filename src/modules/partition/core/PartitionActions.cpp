@@ -1,7 +1,6 @@
 /* === This file is part of Calamares - <http://github.com/calamares> ===
  *
- *   Copyright 2014-2017, Teo Mrnjavac <teo@kde.org>
- *   Copyright 2017, Adriaan de Groot <groot@kde.org>
+ *   Copyright 2014-2016, Teo Mrnjavac <teo@kde.org>
  *
  *   Calamares is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -35,29 +34,14 @@
 
 namespace PartitionActions
 {
-constexpr qint64 operator ""_MiB( unsigned long long m )
-{
-    return m * static_cast< qint64 >( 1024 ) * 1024;
-}
-
-constexpr qint64 operator ""_GiB( unsigned long long m )
-{
-    return operator ""_MiB(m) * static_cast< qint64 >( 1024 );
-}
-
-constexpr qint64 toMiB( unsigned long long m )
-{
-    return operator ""_MiB( m );
-}
-
-constexpr qint64 toGiB( unsigned long long m )
-{
-    return operator ""_GiB( m );
-}
 
 qint64
 swapSuggestion( const qint64 availableSpaceB )
 {
+
+#define MiB * static_cast< qint64 >( 1024 ) * 1024
+#define GiB * static_cast< qint64 >( 1024 ) * 1024 * 1024
+
     // swap(mem) = max(2, 2 * mem), if mem < 2 GiB
     //           = mem,             if 2 GiB <= mem < 8 GiB
     //           = mem / 2,         if 8 GIB <= mem < 64 GiB
@@ -78,10 +62,10 @@ swapSuggestion( const qint64 availableSpaceB )
 
     if ( ensureSuspendToDisk )
     {
-        if ( availableRamB < 4_GiB )
-            suggestedSwapSizeB = qMax( 2_GiB, availableRamB * 2 );
-        else if ( availableRamB >= 4_GiB && availableRamB < 8_GiB )
-            suggestedSwapSizeB = 8_GiB;
+        if ( availableRamB < 4 GiB )
+            suggestedSwapSizeB = qMax( 2 GiB, availableRamB * 2 );
+        else if ( availableRamB >= 4 GiB && availableRamB < 8 GiB )
+            suggestedSwapSizeB = 8 GiB;
         else
             suggestedSwapSizeB = availableRamB;
 
@@ -89,14 +73,14 @@ swapSuggestion( const qint64 availableSpaceB )
     }
     else //if we don't care about suspend to disk
     {
-        if ( availableRamB < 2_GiB )
-            suggestedSwapSizeB = qMax( 2_GiB, availableRamB * 2 );
-        else if ( availableRamB >= 2_GiB && availableRamB < 8_GiB )
+        if ( availableRamB < 2 GiB )
+            suggestedSwapSizeB = qMax( 2 GiB, availableRamB * 2 );
+        else if ( availableRamB >= 2 GiB && availableRamB < 8 GiB )
             suggestedSwapSizeB = availableRamB;
-        else if ( availableRamB >= 8_GiB && availableRamB < 64_GiB )
+        else if ( availableRamB >= 8 GiB && availableRamB < 64 GiB )
             suggestedSwapSizeB = availableRamB / 2;
         else
-            suggestedSwapSizeB = 4_GiB;
+            suggestedSwapSizeB = 4 GiB;
 
         suggestedSwapSizeB *= overestimationFactor;
 
@@ -116,15 +100,18 @@ swapSuggestion( const qint64 availableSpaceB )
 void
 doAutopartition( PartitionCoreModule* core, Device* dev, const QString& luksPassphrase )
 {
-    Calamares::GlobalStorage* gs = Calamares::JobQueue::instance()->globalStorage();
-
     bool isEfi = false;
     if ( QDir( "/sys/firmware/efi/efivars" ).exists() )
         isEfi = true;
 
-    QString defaultFsType = gs->value( "defaultFileSystemType" ).toString();
+    QString defaultFsType = Calamares::JobQueue::instance()->
+                                globalStorage()->
+                                value( "defaultFileSystemType" ).toString();
     if ( FileSystem::typeForName( defaultFsType ) == FileSystem::Unknown )
         defaultFsType = "ext4";
+
+#define MiB * static_cast< qint64 >( 1024 ) * 1024
+#define GiB * static_cast< qint64 >( 1024 ) * 1024 * 1024
 
     // Partition sizes are expressed in MiB, should be multiples of
     // the logical sector size (usually 512B).
@@ -141,11 +128,11 @@ doAutopartition( PartitionCoreModule* core, Device* dev, const QString& luksPass
         empty_space_size = 1;
     }
 
-    qint64 firstFreeSector = toMiB(empty_space_size) / dev->logicalSize() + 1;
+    qint64 firstFreeSector = empty_space_size MiB / dev->logicalSectorSize() + 1;
 
     if ( isEfi )
     {
-        qint64 lastSector = firstFreeSector + ( toMiB(uefisys_part_size) / dev->logicalSize() );
+        qint64 lastSector = firstFreeSector + ( uefisys_part_size MiB / dev->logicalSectorSize() );
         core->createPartitionTable( dev, PartitionTable::gpt );
         Partition* efiPartition = KPMHelpers::createNewPartition(
             dev->partitionTable(),
@@ -157,9 +144,11 @@ doAutopartition( PartitionCoreModule* core, Device* dev, const QString& luksPass
             PartitionTable::FlagEsp
         );
         PartitionInfo::setFormat( efiPartition, true );
-        PartitionInfo::setMountPoint( efiPartition, gs->value( "efiSystemPartition" )
+        PartitionInfo::setMountPoint( efiPartition, Calamares::JobQueue::instance()
+                                                        ->globalStorage()
+                                                        ->value( "efiSystemPartition" )
                                                         .toString() );
-        core->createPartition( dev, efiPartition, PartitionTable::FlagEsp | PartitionTable::FlagBoot );
+        core->createPartition( dev, efiPartition );
         firstFreeSector = lastSector + 1;
     }
     else
@@ -167,26 +156,22 @@ doAutopartition( PartitionCoreModule* core, Device* dev, const QString& luksPass
         core->createPartitionTable( dev, PartitionTable::msdos );
     }
 
-    const bool mayCreateSwap = !gs->value( "neverCreateSwap" ).toBool();
     bool shouldCreateSwap = false;
-    qint64 suggestedSwapSizeB = 0;
+    qint64 availableSpaceB = ( dev->totalSectors() - firstFreeSector ) * dev->logicalSectorSize();
+    qint64 suggestedSwapSizeB = swapSuggestion( availableSpaceB );
+    qint64 requiredSpaceB =
+            ( Calamares::JobQueue::instance()->
+              globalStorage()->
+              value( "requiredStorageGB" ).toDouble() + 0.1 + 2.0 ) GiB +
+            suggestedSwapSizeB;
 
-    if ( mayCreateSwap )
-    {
-        qint64 availableSpaceB = ( dev->totalLogical() - firstFreeSector ) * dev->logicalSize();
-        suggestedSwapSizeB = swapSuggestion( availableSpaceB );
-        qint64 requiredSpaceB =
-                toGiB( gs->value( "requiredStorageGB" ).toDouble() + 0.1 + 2.0 ) +
-                suggestedSwapSizeB;
+    // If there is enough room for ESP + root + swap, create swap, otherwise don't.
+    shouldCreateSwap = availableSpaceB > requiredSpaceB;
 
-        // If there is enough room for ESP + root + swap, create swap, otherwise don't.
-        shouldCreateSwap = availableSpaceB > requiredSpaceB;
-    }
-
-    qint64 lastSectorForRoot = dev->totalLogical() - 1; //last sector of the device
+    qint64 lastSectorForRoot = dev->totalSectors() - 1; //last sector of the device
     if ( shouldCreateSwap )
     {
-        lastSectorForRoot -= suggestedSwapSizeB / dev->logicalSize() + 1;
+        lastSectorForRoot -= suggestedSwapSizeB / dev->logicalSectorSize() + 1;
     }
 
     Partition* rootPartition = nullptr;
@@ -228,7 +213,7 @@ doAutopartition( PartitionCoreModule* core, Device* dev, const QString& luksPass
                 PartitionRole( PartitionRole::Primary ),
                 FileSystem::LinuxSwap,
                 lastSectorForRoot + 1,
-                dev->totalLogical() - 1
+                dev->totalSectors() - 1
             );
         }
         else
@@ -239,7 +224,7 @@ doAutopartition( PartitionCoreModule* core, Device* dev, const QString& luksPass
                 PartitionRole( PartitionRole::Primary ),
                 FileSystem::LinuxSwap,
                 lastSectorForRoot + 1,
-                dev->totalLogical() - 1,
+                dev->totalSectors() - 1,
                 luksPassphrase
             );
         }

@@ -56,8 +56,6 @@ SummaryPage::SummaryPage( const SummaryViewStep* thisViewStep, QWidget* parent )
 }
 
 
-// Adds a widget for those ViewSteps that want a summary;
-// see SummaryPage documentation and also ViewStep docs.
 void
 SummaryPage::onActivate()
 {
@@ -97,6 +95,7 @@ SummaryPage::onActivate()
     }
     m_layout->addStretch();
 }
+
 
 Calamares::ViewStepList
 SummaryPage::stepsForSummary( const Calamares::ViewStepList& allSteps ) const

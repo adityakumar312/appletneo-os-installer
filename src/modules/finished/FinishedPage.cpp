@@ -1,7 +1,6 @@
 /* === This file is part of Calamares - <http://github.com/calamares> ===
  *
  *   Copyright 2014-2015, Teo Mrnjavac <teo@kde.org>
- *   Copyright 2017, Adriaan de Groot <groot@kde.org>
  *
  *   Calamares is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -40,7 +39,6 @@ FinishedPage::FinishedPage( QWidget* parent )
     , ui( new Ui::FinishedPage )
     , m_restartSetUp( false )
 {
-    cDebug() << "FinishedPage()";
     ui->setupUi( this );
 
     ui->mainText->setAlignment( Qt::AlignCenter );
@@ -53,8 +51,10 @@ FinishedPage::FinishedPage( QWidget* parent )
                              "%1 has been installed on your computer.<br/>"
                              "You may now restart into your new system, or continue "
                              "using the %2 Live environment." )
-                         .arg( *Calamares::Branding::VersionedName )
-                         .arg( *Calamares::Branding::ProductName ) );
+                         .arg( Calamares::Branding::instance()->
+                               string( Calamares::Branding::VersionedName ) )
+                         .arg( Calamares::Branding::instance()->
+                               string( Calamares::Branding::ProductName ) ) );
     )
 }
 
@@ -83,7 +83,6 @@ FinishedPage::setRestartNowCommand( const QString& command )
 void
 FinishedPage::setUpRestart()
 {
-    cDebug() << "FinishedPage::setUpRestart()";
     if ( !m_restartSetUp )
     {
         connect( qApp, &QApplication::aboutToQuit,
@@ -103,14 +102,3 @@ FinishedPage::focusInEvent( QFocusEvent* e )
     e->accept();
 }
 
-void
-FinishedPage::onInstallationFailed( const QString& message, const QString& details )
-{
-    Q_UNUSED( details );
-    ui->mainText->setText( tr( "<h1>Installation Failed</h1><br/>"
-                             "%1 has not been installed on your computer.<br/>"
-                             "The error message was: %2." )
-                        .arg( *Calamares::Branding::VersionedName )
-                        .arg( message ) );
-    setRestartNowEnabled( false );
-}

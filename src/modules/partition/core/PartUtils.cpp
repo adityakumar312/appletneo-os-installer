@@ -22,11 +22,7 @@
 
 #include "core/DeviceModel.h"
 #include "core/KPMHelpers.h"
-#include "core/PartitionIterator.h"
 
-#include <kpmcore/backend/corebackend.h>
-#include <kpmcore/backend/corebackendmanager.h>
-#include <kpmcore/core/device.h>
 #include <kpmcore/core/partition.h>
 
 #include <utils/Logger.h>
@@ -55,9 +51,8 @@ canBeReplaced( Partition* candidate )
     qint64 requiredStorageB = ( requiredStorageGB + 0.5 ) * 1024 * 1024 * 1024;
     cDebug() << "Required  storage B:" << requiredStorageB
              << QString( "(%1GB)" ).arg( requiredStorageB / 1024 / 1024 / 1024 );
-    cDebug() << "Storage capacity  B:" << availableStorageB
-             << QString( "(%1GB)" ).arg( availableStorageB / 1024 / 1024 / 1024 )
-             << "for" << candidate->partitionPath() << "   length:" << candidate->length();
+    cDebug() << "Available storage B:" << availableStorageB
+             << QString( "(%1GB)" ).arg( availableStorageB / 1024 / 1024 / 1024 );
 
     if ( ok &&
          availableStorageB > requiredStorageB )
@@ -98,22 +93,19 @@ canBeResized( Partition* candidate )
                                     ->globalStorage()
                                     ->value( "requiredStorageGB" )
                                     .toDouble( &ok );
-    double advisedStorageGB = requiredStorageGB + 0.5 + 2.0;
 
     qint64 availableStorageB = candidate->available();
 
     // We require a little more for partitioning overhead and swap file
     // TODO: maybe make this configurable?
-    qint64 advisedStorageB = advisedStorageGB * 1024 * 1024 * 1024;
-    cDebug() << "Required  storage B:" << advisedStorageB
-             << QString( "(%1GB)" ).arg( advisedStorageGB );
+    qint64 requiredStorageB = ( requiredStorageGB + 0.5 + 2.0 ) * 1024 * 1024 * 1024;
+    cDebug() << "Required  storage B:" << requiredStorageB
+             << QString( "(%1GB)" ).arg( requiredStorageB / 1024 / 1024 / 1024 );
     cDebug() << "Available storage B:" << availableStorageB
-             << QString( "(%1GB)" ).arg( availableStorageB / 1024 / 1024 / 1024 )
-             << "for" << candidate->partitionPath() << "   length:" << candidate->length()
-             << "   sectorsUsed:" << candidate->sectorsUsed() << "   fsType:" << candidate->fileSystem().name();
+             << QString( "(%1GB)" ).arg( availableStorageB / 1024 / 1024 / 1024 );
 
     if ( ok &&
-         availableStorageB > advisedStorageB )
+         availableStorageB > requiredStorageB )
     {
         cDebug() << "Partition" << candidate->partitionPath() << "authorized for resize + autopartition install.";
 
@@ -328,4 +320,5 @@ runOsprober( PartitionCoreModule* core )
     return osproberEntries;
 }
 
-}  // nmamespace PartUtils
+
+}

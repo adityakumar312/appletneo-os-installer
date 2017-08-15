@@ -1,9 +1,7 @@
 include_directories( ${PROJECT_BINARY_DIR}/src/libcalamaresui )
-
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules )
 find_package( LIBPARTED REQUIRED )
 find_package( Qt5 ${QT_VERSION} CONFIG REQUIRED DBus Network )
-
-include_directories( ${PROJECT_BINARY_DIR}/src/libcalamaresui )
 
 set_source_files_properties( checker/partman_devices.c PROPERTIES LANGUAGE CXX )
 
@@ -28,7 +26,7 @@ calamares_add_plugin( welcome
         WelcomePage.cpp
     UI
         WelcomePage.ui
-    LINK_PRIVATE_LIBRARIES
+    LINK_LIBRARIES
         calamaresui
         ${CHECKER_LINK_LIBRARIES}
     SHARED_LIB

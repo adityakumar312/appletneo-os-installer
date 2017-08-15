@@ -1,7 +1,6 @@
 /* === This file is part of Calamares - <http://github.com/calamares> ===
  *
  *   Copyright 2016, Teo Mrnjavac <teo@kde.org>
- *   Copyright 2017, Adriaan de Groot <groot@kde.org>
  *
  *   Calamares is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,11 +17,8 @@
  */
 
 #include "LocaleConfiguration.h"
-#include <QLocale>
 
 LocaleConfiguration::LocaleConfiguration()
-    : explicit_lang( false )
-    , explicit_lc( false )
 {
 }
 
@@ -45,7 +41,6 @@ LocaleConfiguration::fromLanguageAndLocation( const QString& languageLocale,
 {
     LocaleConfiguration lc = LocaleConfiguration();
     QString language = languageLocale.split( '_' ).first();
-    lc.myLanguageLocaleBcp47 = QLocale(language).bcp47Name();
 
     QStringList linesForLanguage;
     for ( const QString &line : availableLocales )
@@ -272,7 +267,7 @@ LocaleConfiguration::fromLanguageAndLocation( const QString& languageLocale,
 
 
 bool
-LocaleConfiguration::isEmpty() const
+LocaleConfiguration::isEmpty()
 {
     return lang.isEmpty() &&
          lc_numeric.isEmpty() &&

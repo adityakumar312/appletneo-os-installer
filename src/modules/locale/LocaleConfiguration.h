@@ -1,7 +1,6 @@
 /* === This file is part of Calamares - <http://github.com/calamares> ===
  *
  *   Copyright 2016, Teo Mrnjavac <teo@kde.org>
- *   Copyright 2017, Adriaan de Groot <groot@kde.org>
  *
  *   Calamares is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -33,18 +32,13 @@ public:
                                                         const QStringList& availableLocales,
                                                         const QString& countryCode );
 
-    bool isEmpty() const;
+    bool isEmpty();
 
     // These become all uppercase in locale.conf, but we keep them lowercase here to
     // avoid confusion with locale.h.
     QString lang, lc_numeric, lc_time, lc_monetary, lc_paper, lc_name, lc_address,
             lc_telephone, lc_measurement, lc_identification;
-    QString myLanguageLocaleBcp47;
     QMap< QString, QString > toMap();
-
-    // If the user has explicitly selected language (from the dialog)
-    // or numbers format, set these to avoid implicit changes to them.
-    bool explicit_lang, explicit_lc;
 };
 
 #endif // LOCALECONFIGURATION_H

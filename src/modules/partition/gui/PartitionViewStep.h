@@ -33,8 +33,8 @@ class PartitionCoreModule;
 class QStackedWidget;
 
 /**
- * The starting point of the module. Instantiates PartitionCoreModule,
- * ChoicePage and PartitionPage, then connects them.
+ * The starting point of the module. Instantiates PartitionCoreModule and
+ * PartitionPage, then connect them.
  */
 class PLUGINDLLEXPORT PartitionViewStep : public Calamares::ViewStep
 {

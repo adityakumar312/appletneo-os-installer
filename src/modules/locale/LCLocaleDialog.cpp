@@ -1,7 +1,6 @@
 /* === This file is part of Calamares - <http://github.com/calamares> ===
  *
  *   Copyright 2014, Teo Mrnjavac <teo@kde.org>
- *   Copyright 2017, Adriaan de Groot <groot@kde.org>
  *
  *   Calamares is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -70,8 +69,6 @@ LCLocaleDialog::LCLocaleDialog( const QString& guessedLCLocale,
     connect( dbb->button( QDialogButtonBox::Cancel ), &QPushButton::clicked,
              this, &QDialog::reject );
 
-    connect( m_localesWidget, &QListWidget::itemDoubleClicked,
-             this, &QDialog::accept );
     connect( m_localesWidget, &QListWidget::itemSelectionChanged,
              [this, dbb]()
     {

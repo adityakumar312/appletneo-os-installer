@@ -7,9 +7,7 @@ list( APPEND CALA_WEBVIEW_LINK_LIBRARIES
 
 option( WEBVIEW_FORCE_WEBKIT "Always build webview with WebKit instead of WebEngine regardless of Qt version." OFF)
 
-message( STATUS "Found Qt version ${Qt5Core_VERSION}")
 if ( Qt5Core_VERSION VERSION_LESS 5.6 OR WEBVIEW_FORCE_WEBKIT )
-    message( STATUS " .. using webkit")
     find_package( Qt5 ${QT_VERSION} CONFIG REQUIRED WebKit WebKitWidgets )
 
     list( APPEND CALA_WEBVIEW_INCLUDE_DIRECTORIES
@@ -21,7 +19,6 @@ if ( Qt5Core_VERSION VERSION_LESS 5.6 OR WEBVIEW_FORCE_WEBKIT )
     )
     set( WEBVIEW_WITH_WEBKIT 1 )
 else()
-    message( STATUS " .. using webengine")
     find_package( Qt5 ${QT_VERSION} CONFIG REQUIRED WebEngine WebEngineWidgets )
 
     list( APPEND CALA_WEBVIEW_INCLUDE_DIRECTORIES
@@ -47,7 +44,7 @@ calamares_add_plugin( webview
     EXPORT_MACRO PLUGINDLLEXPORT_PRO
     SOURCES
         WebViewStep.cpp
-    LINK_PRIVATE_LIBRARIES
+    LINK_LIBRARIES
         ${CALA_WEBVIEW_LINK_LIBRARIES}
     SHARED_LIB
 )

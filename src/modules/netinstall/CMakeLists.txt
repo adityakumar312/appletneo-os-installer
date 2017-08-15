@@ -6,15 +6,13 @@ calamares_add_plugin( netinstall
     SOURCES
         NetInstallViewStep.cpp
         NetInstallPage.cpp
-        PackageTreeItem.cpp
-        PackageModel.cpp
+        widgets/groupselectionwidget.cpp
     UI
         page_netinst.ui
+        widgets/groupselectionwidget.ui
     RESOURCES
         netinstall.qrc
-    LINK_PRIVATE_LIBRARIES
+    LINK_LIBRARIES
         calamaresui
-        Qt5::Network
-        yaml-cpp
     SHARED_LIB
 )

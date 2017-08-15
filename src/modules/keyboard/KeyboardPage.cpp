@@ -1,7 +1,6 @@
 /* === This file is part of Calamares - <http://github.com/calamares> ===
  *
  *   Copyright 2014-2016, Teo Mrnjavac <teo@kde.org>
- *   Copyright 2017, Adriaan de Groot <groot@kde.org>
  *
  *   Portions from the Manjaro Installation Framework
  *   by Roland Singer <roland@manjaro.org>
@@ -37,21 +36,6 @@
 #include <QProcess>
 #include <QPushButton>
 
-static QPersistentModelIndex
-findLayout( const KeyboardLayoutModel* klm, const QString& currentLayout )
-{
-    QPersistentModelIndex currentLayoutItem;
-
-    for ( int i = 0; i < klm->rowCount(); ++i )
-    {
-        QModelIndex idx = klm->index( i );
-        if ( idx.isValid() &&
-             idx.data( KeyboardLayoutModel::KeyboardLayoutKeyRole ).toString() == currentLayout )
-            currentLayoutItem = idx;
-    }
-
-    return currentLayoutItem;
-}
 
 KeyboardPage::KeyboardPage( QWidget* parent )
     : QWidget()
@@ -83,8 +67,8 @@ KeyboardPage::KeyboardPage( QWidget* parent )
         QString model = m_models.value( text, "pc105" );
 
         // Set Xorg keyboard model
-        QProcess::execute( QLatin1Literal( "setxkbmap" ),
-                           QStringList() << "-model" << model );
+        QProcess::execute( QString( "setxkbmap -model \"%1\"" )
+                           .arg( model ).toUtf8() );
     });
 
     CALAMARES_RETRANSLATE( ui->retranslateUi( this ); )
@@ -175,13 +159,14 @@ KeyboardPage::init()
     // Block signals
     ui->listLayout->blockSignals( true );
 
-    QPersistentModelIndex currentLayoutItem = findLayout( klm, currentLayout );
-    if ( !currentLayoutItem.isValid() && (
-           ( currentLayout == "latin" )
-        || ( currentLayout == "pc" ) ) )
+    QPersistentModelIndex currentLayoutItem;
+
+    for ( int i = 0; i < klm->rowCount(); ++i )
     {
-        currentLayout = "us";
-        currentLayoutItem = findLayout( klm, currentLayout );
+        QModelIndex idx = klm->index( i );
+        if ( idx.isValid() &&
+             idx.data( KeyboardLayoutModel::KeyboardLayoutKeyRole ).toString() == currentLayout )
+            currentLayoutItem = idx;
     }
 
     // Set current layout and variant
@@ -307,16 +292,6 @@ KeyboardPage::onListLayoutCurrentItemChanged( const QModelIndex& current,
     updateVariants( QPersistentModelIndex( current ) );
 }
 
-/* Returns stringlist with suitable setxkbmap command-line arguments
- * to set the given @p layout and @p variant.
- */
-static inline QStringList xkbmap_args( QStringList&& r, const QString& layout, const QString& variant)
-{
-    r << "-layout" << layout;
-    if ( !variant.isEmpty() )
-        r << "-variant" << variant;
-    return r;
-}
 
 void
 KeyboardPage::onListVariantCurrentItemChanged( QListWidgetItem* current, QListWidgetItem* previous )
@@ -345,13 +320,13 @@ KeyboardPage::onListVariantCurrentItemChanged( QListWidgetItem* current, QListWi
     connect( &m_setxkbmapTimer, &QTimer::timeout,
              this, [=]
     {
-        QProcess::execute( QLatin1Literal( "setxkbmap" ),
-                           xkbmap_args( QStringList(), layout, variant ) );
+        QProcess::execute( QString( "setxkbmap -layout \"%1\" -variant \"%2\"" )
+                           .arg( layout, variant ).toUtf8() );
         cDebug() << "xkbmap selection changed to: " << layout << "-" << variant;
-        m_setxkbmapTimer.disconnect( this );
     } );
     m_setxkbmapTimer.start( QApplication::keyboardInputInterval() );
 
     m_selectedLayout = layout;
     m_selectedVariant = variant;
 }
+

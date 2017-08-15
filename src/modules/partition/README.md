@@ -61,7 +61,7 @@ run on storage device which does not contain any data you care about.
 
 To build them:
 
-    cd $top_build_dir
+    cd $top_build_dir/src/modules/partitions/tests
     make buildtests
 
 To run them you need to define the `CALAMARES_TEST_DISK` environment variable.
@@ -69,7 +69,7 @@ It should contain the device path to the test disk. For example, assuming you
 plugged a test USB stick identified as `/dev/sdb`, you would run the tests like
 this:
 
-    sudo CALAMARES_TEST_DISK=/dev/sdb $top_build_dir/partitionjobtests
+    sudo CALAMARES_TEST_DISK=/dev/sdb $top_build_dir/partitiontests
 
 
 # TODO

@@ -1,10 +1,6 @@
 rootMountPoint: /tmp/mount
 packageOperations:
   - install:
-    - pre-script: touch /tmp/foo
-      package: vi
-      post-script: rm /tmp/foo
-    - wget
+    - vi
   - remove:
     - vi
-    - wget

@@ -5,7 +5,6 @@
 #
 #   Copyright 2014, Rohan Garg <rohan@kde.org>
 #   Copyright 2015, Philip Müller <philm@manjaro.org>
-#   Copyright 2017, Alf Gaida <agaida@sidution.org>
 #
 #   Calamares is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -26,9 +25,7 @@ from collections import OrderedDict
 
 
 def cpuinfo():
-    """
-    Return the information in /proc/cpuinfo as a dictionary in the following
-    format:
+    """ Return the information in /proc/cpuinfo as a dictionary in the following format:
 
     cpu_info['proc0']={...}
     cpu_info['proc1']={...}
@@ -48,8 +45,7 @@ def cpuinfo():
                 procinfo = OrderedDict()
             else:
                 if len(line.split(':')) == 2:
-                    splitted_line = line.split(':')[1].strip()
-                    procinfo[line.split(':')[0].strip()] = splitted_line
+                    procinfo[line.split(':')[0].strip()] = line.split(':')[1].strip()
                 else:
                     procinfo[line.split(':')[0].strip()] = ''
 
@@ -57,8 +53,7 @@ def cpuinfo():
 
 
 def write_mkinitcpio_lines(hooks, modules, files, root_mount_point):
-    """
-    Set up mkinitcpio.conf.
+    """ Set up mkinitcpio.conf.
 
     :param hooks:
     :param modules:
@@ -86,8 +81,7 @@ def write_mkinitcpio_lines(hooks, modules, files, root_mount_point):
 
 
 def modify_mkinitcpio_conf(partitions, root_mount_point):
-    """
-    Modifies mkinitcpio.conf
+    """ Modifies mkinitcpio.conf
 
     :param partitions:
     :param root_mount_point:
@@ -95,8 +89,7 @@ def modify_mkinitcpio_conf(partitions, root_mount_point):
     cpu = cpuinfo()
     swap_uuid = ""
     btrfs = ""
-    hooks = ["base", "udev", "autodetect", "modconf", "block", "keyboard",
-             "keymap"]
+    hooks = ["base", "udev", "autodetect", "modconf", "block", "keyboard", "keymap"]
     modules = []
     files = []
     encrypt_hook = False
@@ -120,29 +113,25 @@ def modify_mkinitcpio_conf(partitions, root_mount_point):
         if partition["mountPoint"] == "/" and "luksMapperName" in partition:
             encrypt_hook = True
 
-        if (partition["mountPoint"] == "/boot"
-                and "luksMapperName" not in partition):
+        if partition["mountPoint"] == "/boot" and "luksMapperName" not in partition:
             unencrypted_separate_boot = True
 
     if encrypt_hook:
         hooks.append("encrypt")
         if not unencrypted_separate_boot and \
-           os.path.isfile(
-               os.path.join(root_mount_point, "crypto_keyfile.bin")
-               ):
+           os.path.isfile(os.path.join(root_mount_point, "crypto_keyfile.bin")):
             files.append("/crypto_keyfile.bin")
 
-    if swap_uuid != "":
+    if swap_uuid is not "":
         if encrypt_hook and openswap_hook:
             hooks.extend(["openswap"])
         hooks.extend(["resume", "filesystems"])
     else:
         hooks.extend(["filesystems"])
 
-    if btrfs == "yes" and cpu['proc0']['vendor_id'].lower() != "genuineintel":
+    if btrfs is "yes" and cpu['proc0']['vendor_id'].lower() != "genuineintel":
         modules.append("crc32c")
-    elif (btrfs == "yes"
-          and cpu['proc0']['vendor_id'].lower() == "genuineintel"):
+    elif btrfs is "yes" and cpu['proc0']['vendor_id'].lower() == "genuineintel":
         modules.append("crc32c-intel")
     else:
         hooks.append("fsck")
@@ -151,8 +140,7 @@ def modify_mkinitcpio_conf(partitions, root_mount_point):
 
 
 def run():
-    """
-    Calls routine with given parameters to modify '/etc/mkinitcpio.conf'.
+    """ Calls routine with given parameters to modify '/etc/mkinitcpio.conf'.
 
     :return:
     """

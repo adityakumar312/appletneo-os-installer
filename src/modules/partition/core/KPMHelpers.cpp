@@ -43,7 +43,10 @@ initKPMcore()
         return true;
 
     QByteArray backendName = qgetenv( "KPMCORE_BACKEND" );
-    if ( !CoreBackendManager::self()->load( backendName.isEmpty() ? CoreBackendManager::defaultBackendName() : backendName ) )
+    if ( backendName.isEmpty() )
+        backendName = "pmlibpartedbackendplugin";
+
+    if ( !CoreBackendManager::self()->load( backendName ) )
     {
         qWarning() << "Failed to load backend plugin" << backendName;
         return false;
@@ -148,12 +151,6 @@ createNewEncryptedPartition( PartitionNode* parent,
                            FileSystemFactory::create( FileSystem::Luks,
                                                       firstSector,
                                                       lastSector ) );
-    if ( !fs )
-    {
-        qDebug() << "ERROR: cannot create LUKS filesystem. Giving up.";
-        return nullptr;
-    }
-
     fs->createInnerFileSystem( fsType );
     fs->setPassphrase( passphrase );
     Partition* p = new Partition( parent,

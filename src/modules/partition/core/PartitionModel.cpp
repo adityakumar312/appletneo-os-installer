@@ -148,7 +148,7 @@ PartitionModel::data( const QModelIndex& index, int role ) const
             return PartitionInfo::mountPoint( partition );
         if ( col == SizeColumn )
         {
-            qint64 size = ( partition->lastSector() - partition->firstSector() + 1 ) * m_device->logicalSize();
+            qint64 size = ( partition->lastSector() - partition->firstSector() + 1 ) * m_device->logicalSectorSize();
             return KFormat().formatByteSize( size );
         }
         cDebug() << "Unknown column" << col;
@@ -175,12 +175,12 @@ PartitionModel::data( const QModelIndex& index, int role ) const
             }
         }
         QString prettyFileSystem = KPMHelpers::prettyNameForFileSystemType( partition->fileSystem().type() );
-        qint64 size = ( partition->lastSector() - partition->firstSector() + 1 ) * m_device->logicalSize();
+        qint64 size = ( partition->lastSector() - partition->firstSector() + 1 ) * m_device->logicalSectorSize();
         QString prettySize = KFormat().formatByteSize( size );
         return QVariant(name + " " + prettyFileSystem + " " + prettySize);
     }
     case SizeRole:
-        return ( partition->lastSector() - partition->firstSector() + 1 ) * m_device->logicalSize();
+        return ( partition->lastSector() - partition->firstSector() + 1 ) * m_device->logicalSectorSize();
     case IsFreeSpaceRole:
         return KPMHelpers::isPartitionFreeSpace( partition );
 

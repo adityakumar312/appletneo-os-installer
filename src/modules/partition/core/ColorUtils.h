@@ -34,12 +34,6 @@ QColor freeSpaceColor();
 
 QColor unknownDisklabelColor();
 
-/**
- * @brief colorForPartition iterates over partitions, caches their colors and returns
- * a color for the given partition.
- * @param partition the partition for which to return a color.
- * @return a color for the partition.
- */
 QColor colorForPartition( Partition* partition );
 
 /**
@@ -48,9 +42,6 @@ QColor colorForPartition( Partition* partition );
  */
 QColor colorForPartitionInFreeSpace( Partition* freeSpacePartition );
 
-/**
- * @brief invalidateCache clears the partition colors cache.
- */
 void invalidateCache();
 
 }

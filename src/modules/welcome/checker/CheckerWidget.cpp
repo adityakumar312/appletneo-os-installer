@@ -1,7 +1,6 @@
 /* === This file is part of Calamares - <http://github.com/calamares> ===
  *
  *   Copyright 2014-2015, Teo Mrnjavac <teo@kde.org>
- *   Copyright 2017, Adriaan de Groot <groot@kde.org>
  *
  *   Calamares is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -97,7 +96,8 @@ CheckerWidget::init( const QList< PrepareEntry >& checkEntries )
                                         "requirements for installing %1.<br/>"
                                         "Installation cannot continue. "
                                         "<a href=\"#details\">Details...</a>" )
-                                        .arg( *Calamares::Branding::ShortVersionedName ) );
+                                        .arg( Calamares::Branding::instance()->
+                                              string( Calamares::Branding::ShortVersionedName ) ) );
             )
             textLabel->setOpenExternalLinks( false );
             connect( textLabel, &QLabel::linkActivated,
@@ -114,7 +114,8 @@ CheckerWidget::init( const QList< PrepareEntry >& checkEntries )
                                         "recommended requirements for installing %1.<br/>"
                                         "Installation can continue, but some features "
                                         "might be disabled." )
-                                        .arg( *Calamares::Branding::ShortVersionedName ) );
+                                        .arg( Calamares::Branding::instance()->
+                                              string( Calamares::Branding::ShortVersionedName ) ) );
             )
         }
     }
@@ -128,29 +129,20 @@ CheckerWidget::init( const QList< PrepareEntry >& checkEntries )
                                imagePath( Calamares::Branding::ProductWelcome ) );
             if ( !theImage.isNull() )
             {
-                QLabel* imageLabel;
-                if ( Calamares::Branding::instance()->welcomeExpandingLogo() )
-                {
-                    FixedAspectRatioLabel *p = new FixedAspectRatioLabel;
-                    p->setPixmap( theImage );
-                    imageLabel = p;
-                }
-                else
-                {
-                    imageLabel = new QLabel;
-                    imageLabel->setPixmap( theImage );
-                }
-
-                imageLabel->setContentsMargins( 4, CalamaresUtils::defaultFontHeight() * 3 / 4, 4, 4 );
+                FixedAspectRatioLabel* imageLabel = new FixedAspectRatioLabel;
+                imageLabel->setContentsMargins( 4, CalamaresUtils::defaultFontHeight()*0.75, 4, 4 );
                 m_mainLayout->addWidget( imageLabel );
                 imageLabel->setAlignment( Qt::AlignCenter );
                 imageLabel->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+
+                imageLabel->setPixmap( theImage );
             }
         }
         CALAMARES_RETRANSLATE(
             textLabel->setText( tr( "This program will ask you some questions and "
                                     "set up %2 on your computer." )
-                                .arg( *Calamares::Branding::ProductName ) );
+                                .arg( Calamares::Branding::instance()->
+                                      string( Calamares::Branding::ProductName ) ) );
             textLabel->setAlignment( Qt::AlignCenter );
         )
     }
